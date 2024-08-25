@@ -34,6 +34,7 @@ stages:
 .compile_test_package_template: &compile_test_package_definition
   stage: build
   script:
+    - pip3 install cmake
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCXX_MARCH=${CXX_MARCH} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
@@ -58,6 +59,7 @@ stages:
 .compile_test_template: &compile_test_definition
   stage: build
   script:
+    - pip3 install cmake
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCXX_MARCH=${CXX_MARCH} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
@@ -137,30 +139,6 @@ stages:
     - dpkg -i deb_focal/*.deb
     - cd scripts/eval_full
     - ./run_evaluations_kitti.sh
-
-bionic-release-compile:
-  <<: *prepare_docker_definition
-  <<: *compile_test_package_definition
-  image: vladyslavusenko/b_image_bionic:latest
-#  only:
-#    - master
-  variables:
-    # compile w/ clang; GCC 7.5 has multiple issues: magic_enum is not
-    # supported, Eigen hast false positive maybe-uninitialized
-    # warnings, structured bindings give false positive
-    # "unused-variable" warnings. Using GCC 9 from the Ubuntu's
-    # toolchain testing PPA would make the built debian package depend
-    # on the updatd libstdc++. So we use clang instead, which works
-    # with the default libstdc++ on bionic and doesn't lead to
-    # additional runtime dependencies for the debian package.
-    CC: clang-13
-    CXX: clang++-13
-    CXX_MARCH: 'haswell'
-    DEB_DIR: deb_bionic
-  artifacts:
-    paths:
-    - deb_bionic/*.deb
-    expire_in: 1 week
 
 focal-release-compile:
   <<: *prepare_docker_definition
@@ -266,23 +244,23 @@ focal-relwithdebinfo-compile:
 #     - ./basalt_vio --help
 #     - ./basalt_vio_sim --help
 
-monterey-arm-brewclang-relwithdebinfo-compile:
-  <<: *compile_test_definition
-  tags: [macos, "12", arm64]
-  only:
-#    - master
-  variables:
-    BUILD_TYPE: CiRelWithDebInfo
-    CC: /opt/homebrew/opt/llvm/bin/clang
-    CXX: /opt/homebrew/opt/llvm/bin/clang++
+# monterey-arm-brewclang-relwithdebinfo-compile:
+#   <<: *compile_test_definition
+#   tags: [macos, "12", arm64]
+#   only:
+# #    - master
+#   variables:
+#     BUILD_TYPE: CiRelWithDebInfo
+#     CC: /opt/homebrew/opt/llvm/bin/clang
+#     CXX: /opt/homebrew/opt/llvm/bin/clang++
 
-monterey-arm-relwithdebinfo-compile:
-  <<: *compile_test_definition
-  tags: [macos, "12", arm64]
-  only:
-#    - master
-  variables:
-    BUILD_TYPE: CiRelWithDebInfo
+# monterey-arm-relwithdebinfo-compile:
+#   <<: *compile_test_definition
+#   tags: [macos, "12", arm64]
+#   only:
+# #    - master
+#   variables:
+#     BUILD_TYPE: CiRelWithDebInfo
 
 # pre-commit checks
 pre-commit:
@@ -302,15 +280,6 @@ pre-commit:
     - pip install pre-commit
     - pre-commit install
     - pre-commit run -a
-
-bionic-test:
-  <<: *test_deb_definition
-  image: vladyslavusenko/b_image_bionic:latest
-  only:
-    - master
-  variables:
-    DEB_DIR: deb_bionic
-    GIT_STRATEGY: none
 
 focal-test:
   <<: *test_deb_definition
@@ -416,7 +385,6 @@ deploy:
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - scp $SCP_FLAGS deb_bionic/*.deb $REPOSITORY_URL/bionic/
     - scp $SCP_FLAGS deb_focal/*.deb $REPOSITORY_URL/focal/
     - scp $SCP_FLAGS deb_jammy/*.deb $REPOSITORY_URL/jammy/
 
@@ -438,13 +406,6 @@ deploy:
     - docker build -t "$CI_REGISTRY_IMAGE"/"$B_IMAGE_NAME" .
     - docker push "$CI_REGISTRY_IMAGE"/"$B_IMAGE_NAME"
 
-
-docker-build-bionic:
-  <<: *docker_build_definition
-  variables:
-    DOCKER_TLS_CERTDIR: '/certs'
-    GIT_SUBMODULE_STRATEGY: none
-    B_IMAGE_NAME: b_image_bionic
 
 docker-build-focal:
   <<: *docker_build_definition
@@ -476,13 +437,6 @@ docker-build-jammy:
     - DEBIAN_FRONTEND=noninteractive apt-get install -y basalt
     - basalt_rs_t265_vio --help
     - basalt_rs_t265_record --help
-
-bionic-repository-check:
-  image: ubuntu:18.04
-  <<: *repository_check_definition
-  variables:
-    GIT_STRATEGY: none
-    REPO_NAME: bionic
 
 focal-repository-check:
   image: ubuntu:20.04

@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pangolin/image/image_io.h>
 #include <pangolin/image/typed_image.h>
 #include <pangolin/pangolin.h>
+#include <pangolin/display/default_font.h>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -399,19 +400,19 @@ int main(int argc, char *argv[]) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         if (t265_device->last_img_data.get())
-          pangolin::GlFont::I()
+          pangolin::default_font()
               .Text("Exposure: %.3f ms.",
                     t265_device->last_img_data->img_data[idx].exposure * 1000.0)
               .Draw(30, 30);
 
         if (idx == 0) {
-          pangolin::GlFont::I()
+          pangolin::default_font()
               .Text("Queue: %d.", image_data_queue2.size())
               .Draw(30, 60);
         }
 
         if (idx == 0 && recording) {
-          pangolin::GlFont::I().Text("Recording").Draw(30, 90);
+          pangolin::default_font().Text("Recording").Draw(30, 90);
         }
       };
 
