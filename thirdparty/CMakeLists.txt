@@ -64,62 +64,88 @@ target_compile_options(opengv PRIVATE
 
 # fix pangolin: gcc
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  target_compile_options(pangolin PRIVATE "-Wno-implicit-fallthrough")
+  foreach(_target ${BASALT_PANGO_TARGETS})
+    target_compile_options(${_target} PRIVATE "-Wno-implicit-fallthrough;-Wno-unused-variable")
+  endforeach()
 endif()
 
 # fix pangolin: macOS
 if(APPLE)
-  target_compile_options(pangolin PRIVATE "-Wno-objc-missing-super-calls")
+  foreach(_target ${BASALT_PANGO_TARGETS})
+  target_compile_options(${_target} PRIVATE "-Wno-objc-missing-super-calls")
+    endforeach()
 endif()
 
 # fix pangolin: macOS >= 10.14 Mojave
 if(APPLE AND CMAKE_SYSTEM_VERSION VERSION_GREATER_EQUAL 18.0.0)
-  target_compile_options(pangolin PRIVATE "-Wno-deprecated-declarations")
+  foreach(_target ${BASALT_PANGO_TARGETS})
+    target_compile_options(${_target} PRIVATE "-Wno-deprecated-declarations")
+    endforeach()
 
   if((CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0.0)
-    target_compile_options(pangolin PRIVATE "-Wno-deprecated-copy")
+    foreach(_target ${BASALT_PANGO_TARGETS})
+      target_compile_options(${_target} PRIVATE "-Wno-deprecated-copy")
+        endforeach()
   endif()
 
 endif()
 
 # fix pangolin: clang
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-  target_compile_options(pangolin PRIVATE "-Wno-null-pointer-arithmetic")
+  foreach(_target ${BASALT_PANGO_TARGETS})
+  target_compile_options(${_target} PRIVATE "-Wno-null-pointer-arithmetic")
+    endforeach()
 endif()
 
 # fix pangolin: clang >= 8.0
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 8.0.0)
-  target_compile_options(pangolin PRIVATE "-Wno-defaulted-function-deleted")
+  foreach(_target ${BASALT_PANGO_TARGETS})
+  target_compile_options(${_target} PRIVATE "-Wno-defaulted-function-deleted")
+    endforeach()
 endif()
 
 # fix pangolin: clang >= 10.0
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0.0)
-  target_compile_options(pangolin PRIVATE "-Wno-deprecated-copy")
+  foreach(_target ${BASALT_PANGO_TARGETS})
+  target_compile_options(${_target} PRIVATE "-Wno-deprecated-copy")
+    endforeach()
 endif()
 
 # fix pangolin: clang >= 13.0
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0.0)
-  target_compile_options(pangolin PRIVATE "-Wno-unused-but-set-variable;-Wno-null-pointer-subtraction")
+  foreach(_target ${BASALT_PANGO_TARGETS})
+  target_compile_options(${_target} PRIVATE "-Wno-unused-but-set-variable;-Wno-null-pointer-subtraction")
+    endforeach()
 endif()
 
 # fix pangolin: clang >= 14.0
 if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0.0)
-  target_compile_options(pangolin PRIVATE "-Wno-unused-but-set-variable")
+    foreach(_target ${BASALT_PANGO_TARGETS})
+  target_compile_options(${_target} PRIVATE "-Wno-unused-but-set-variable")
+    endforeach()
 endif()
 
 # fix pangolin: GCC >= 9.0
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0)
-  target_compile_options(pangolin PRIVATE "-Wno-stringop-truncation;-Wno-deprecated-copy")
+  foreach(_target ${BASALT_PANGO_TARGETS})
+  target_compile_options(${_target} PRIVATE "-Wno-stringop-truncation;-Wno-missing-field-initializers;-Wno-deprecated-copy")
+    endforeach()
 endif()
 
 # fix pangolin: GCC >= 10.0
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
-  target_compile_options(pangolin PRIVATE "-Wno-parentheses")
+  foreach(_target ${BASALT_PANGO_TARGETS})
+    target_compile_options(${_target} PRIVATE "-Wno-parentheses;-Wno-missing-field-initializers;-Wno-unused-variable")
+      endforeach()
 endif()
+
+get_target_property(PANGOLIN_CFLAGS pango_display COMPILE_OPTIONS)
+message("-- Pangolin target compiler flags are: ${PANGOLIN_CFLAGS}")
+
 
 # check here the directories for the pangolin and opengv targets, and
 # confirm that the eigen-related include dirs match.
-foreach(_target opengv pangolin)
+foreach(_target opengv ${BASALT_PANGO_TARGETS})
   get_target_property(_include_dirs ${_target} INTERFACE_INCLUDE_DIRECTORIES)
   foreach(_dir IN LISTS _include_dirs)
     if("${_dir}" MATCHES ".*/eigen3?(/unsupported)?$")
@@ -135,7 +161,7 @@ endforeach()
 # source folder. Thus, we update the property to only include these
 # eigen paths in the "BUILD_INTERFACE" (not "INSTALL").
 if (EIGEN3_INCLUDE_DIR MATCHES "^${CMAKE_SOURCE_DIR}.*")
-  foreach(_target opengv pangolin)
+  foreach(_target opengv ${BASALT_PANGO_TARGETS})
     get_target_property(_include_dirs ${_target} INTERFACE_INCLUDE_DIRECTORIES)
     set(_include_dirs_new "")
     foreach(_dir IN LISTS _include_dirs)
@@ -147,6 +173,3 @@ if (EIGEN3_INCLUDE_DIR MATCHES "^${CMAKE_SOURCE_DIR}.*")
     set_target_properties(${_target} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${_include_dirs_new}")
   endforeach()
 endif()
-
-
-

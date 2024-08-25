@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <basalt/utils/filesystem.h>
 
+#include <pangolin/display/default_font.h>
+
 namespace basalt {
 
 CamCalib::CamCalib(const std::string &dataset_path,
@@ -974,10 +976,10 @@ void CamCalib::drawImageOverlay(pangolin::View &v, size_t cam_id) {
           pangolin::glDrawCirclePerimeter(c[0], c[1], radius);
 
           if (show_ids)
-            pangolin::GlFont::I().Text("%d", cr.corner_ids[i]).Draw(c[0], c[1]);
+            pangolin::default_font().Text("%d", cr.corner_ids[i]).Draw(c[0], c[1]);
         }
 
-        pangolin::GlFont::I()
+        pangolin::default_font()
             .Text("Detected %d corners (%d rejected)", cr.corners.size(),
                   cr_rej.corners.size())
             .Draw(5, 50);
@@ -993,7 +995,7 @@ void CamCalib::drawImageOverlay(pangolin::View &v, size_t cam_id) {
             pangolin::glDrawCirclePerimeter(c[0], c[1], radius);
 
             if (show_ids)
-              pangolin::GlFont::I()
+              pangolin::default_font()
                   .Text("%d", cr_rej.corner_ids[i])
                   .Draw(c[0], c[1]);
           }
@@ -1002,7 +1004,7 @@ void CamCalib::drawImageOverlay(pangolin::View &v, size_t cam_id) {
       } else {
         glLineWidth(1.0);
 
-        pangolin::GlFont::I().Text("Corners not processed").Draw(5, 50);
+        pangolin::default_font().Text("Corners not processed").Draw(5, 50);
       }
     }
 
@@ -1019,15 +1021,15 @@ void CamCalib::drawImageOverlay(pangolin::View &v, size_t cam_id) {
           Eigen::Vector2d c = cr.reprojected_corners[i];
           pangolin::glDrawCirclePerimeter(c[0], c[1], 3.0);
 
-          if (show_ids) pangolin::GlFont::I().Text("%d", i).Draw(c[0], c[1]);
+          if (show_ids) pangolin::default_font().Text("%d", i).Draw(c[0], c[1]);
         }
 
-        pangolin::GlFont::I()
+        pangolin::default_font()
             .Text("Initial pose with %d inliers", cr.num_inliers)
             .Draw(5, 100);
 
       } else {
-        pangolin::GlFont::I().Text("Initial pose not processed").Draw(5, 100);
+        pangolin::default_font().Text("Initial pose not processed").Draw(5, 100);
       }
     }
 
@@ -1048,10 +1050,10 @@ void CamCalib::drawImageOverlay(pangolin::View &v, size_t cam_id) {
             Eigen::Vector2d c = rc.corners_proj[i];
             pangolin::glDrawCirclePerimeter(c[0], c[1], 3.0);
 
-            if (show_ids) pangolin::GlFont::I().Text("%d", i).Draw(c[0], c[1]);
+            if (show_ids) pangolin::default_font().Text("%d", i).Draw(c[0], c[1]);
           }
         } else {
-          pangolin::GlFont::I().Text("Too few corners detected.").Draw(5, 150);
+          pangolin::default_font().Text("Too few corners detected.").Draw(5, 150);
         }
       }
     }
@@ -1079,16 +1081,16 @@ void CamCalib::drawImageOverlay(pangolin::View &v, size_t cam_id) {
 
             if (show_ids) {
               if (has_errors) {
-                pangolin::GlFont::I()
+                pangolin::default_font()
                     .Text("%d(%f)", i, it->second[i])
                     .Draw(c[0], c[1]);
               } else {
-                pangolin::GlFont::I().Text("%d", i).Draw(c[0], c[1]);
+                pangolin::default_font().Text("%d", i).Draw(c[0], c[1]);
               }
             }
           }
         } else {
-          pangolin::GlFont::I().Text("Too few corners detected.").Draw(5, 200);
+          pangolin::default_font().Text("Too few corners detected.").Draw(5, 200);
         }
       }
     }

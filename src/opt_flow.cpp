@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pangolin/image/image_io.h>
 #include <pangolin/image/typed_image.h>
 #include <pangolin/pangolin.h>
+#include <pangolin/display/default_font.h>
 
 #include <CLI/CLI.hpp>
 
@@ -309,10 +310,10 @@ void draw_image_overlay(pangolin::View& v, size_t cam_id) {
         const Eigen::Vector2f c = kv.second.translation();
 
         if (show_ids)
-          pangolin::GlFont::I().Text("%d", kv.first).Draw(5 + c[0], 5 + c[1]);
+          pangolin::default_font().Text("%d", kv.first).Draw(5 + c[0], 5 + c[1]);
       }
 
-      pangolin::GlFont::I()
+      pangolin::default_font()
           .Text("Tracked %d keypoints", kp_map.size())
           .Draw(5, 20);
     }

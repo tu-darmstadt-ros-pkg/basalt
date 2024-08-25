@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pangolin/image/image_io.h>
 #include <pangolin/image/typed_image.h>
 #include <pangolin/pangolin.h>
+#include <pangolin/display/default_font.h>
 
 #include <CLI/CLI.hpp>
 
@@ -397,14 +398,14 @@ void draw_image_overlay(pangolin::View& v, size_t view_id) {
         pangolin::glDrawLine(c, c + r);
       }
 
-      pangolin::GlFont::I()
+      pangolin::default_font()
           .Text("Detected %d corners", cr.corners.size())
           .Draw(5, 20);
 
     } else {
       glLineWidth(1.0);
 
-      pangolin::GlFont::I().Text("Corners not processed").Draw(5, text_row);
+      pangolin::default_font().Text("Corners not processed").Draw(5, text_row);
     }
     text_row += 20;
   }
@@ -453,11 +454,11 @@ void draw_image_overlay(pangolin::View& v, size_t view_id) {
           pangolin::glDrawLine(c, c + r);
 
           if (show_ids) {
-            pangolin::GlFont::I().Text("%d", i).Draw(c[0], c[1]);
+            pangolin::default_font().Text("%d", i).Draw(c[0], c[1]);
           }
         }
 
-        pangolin::GlFont::I()
+        pangolin::default_font()
             .Text("Detected %d matches", it->second.matches.size())
             .Draw(5, text_row);
         text_row += 20;
@@ -486,11 +487,11 @@ void draw_image_overlay(pangolin::View& v, size_t view_id) {
           pangolin::glDrawLine(c, c + r);
 
           if (show_ids) {
-            pangolin::GlFont::I().Text("%d", i).Draw(c[0], c[1]);
+            pangolin::default_font().Text("%d", i).Draw(c[0], c[1]);
           }
         }
 
-        pangolin::GlFont::I()
+        pangolin::default_font()
             .Text("Detected %d inliers", it->second.inliers.size())
             .Draw(5, text_row);
         text_row += 20;

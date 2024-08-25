@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pangolin/image/image_io.h>
 #include <pangolin/image/typed_image.h>
 #include <pangolin/pangolin.h>
+#include <pangolin/display/default_font.h>
 
 #include <CLI/CLI.hpp>
 
@@ -445,10 +446,10 @@ void draw_image_overlay(pangolin::View& v, size_t cam_id) {
         pangolin::glDrawCirclePerimeter(c[0], c[1], radius);
 
         if (show_ids)
-          pangolin::GlFont::I().Text("%d", cr.id[i]).Draw(c[0], c[1]);
+          pangolin::default_font().Text("%d", cr.id[i]).Draw(c[0], c[1]);
       }
 
-      pangolin::GlFont::I().Text("%d gt points", cr.pos.size()).Draw(5, 20);
+      pangolin::default_font().Text("%d gt points", cr.pos.size()).Draw(5, 20);
     }
   }
 
@@ -467,10 +468,10 @@ void draw_image_overlay(pangolin::View& v, size_t cam_id) {
         pangolin::glDrawCirclePerimeter(c[0], c[1], radius);
 
         if (show_ids)
-          pangolin::GlFont::I().Text("%d", cr.id[i]).Draw(c[0], c[1]);
+          pangolin::default_font().Text("%d", cr.id[i]).Draw(c[0], c[1]);
       }
 
-      pangolin::GlFont::I().Text("%d noisy points", cr.pos.size()).Draw(5, 40);
+      pangolin::default_font().Text("%d noisy points", cr.pos.size()).Draw(5, 40);
     }
   }
 
@@ -498,12 +499,12 @@ void draw_image_overlay(pangolin::View& v, size_t cam_id) {
           pangolin::glDrawCirclePerimeter(c[0], c[1], radius);
 
           if (show_ids)
-            pangolin::GlFont::I().Text("%d", int(c[3])).Draw(c[0], c[1]);
+            pangolin::default_font().Text("%d", int(c[3])).Draw(c[0], c[1]);
         }
       }
 
       glColor3f(0.0, 0.0, 1.0);
-      pangolin::GlFont::I().Text("%d vio points", points.size()).Draw(5, 60);
+      pangolin::default_font().Text("%d vio points", points.size()).Draw(5, 60);
     }
   }
 }

@@ -74,6 +74,7 @@ struct PoseVelBiasStateWithLin {
   PoseVelBiasStateWithLin() {
     linearized = false;
     delta.setZero();
+    backup_delta.setZero();
   };
 
   PoseVelBiasStateWithLin(int64_t t_ns, const SE3& T_w_i, const Vec3& vel_w_i,
@@ -82,12 +83,14 @@ struct PoseVelBiasStateWithLin {
       : linearized(linearized),
         state_linearized(t_ns, T_w_i, vel_w_i, bias_gyro, bias_accel) {
     delta.setZero();
+    backup_delta.setZero();
     state_current = state_linearized;
   }
 
   explicit PoseVelBiasStateWithLin(const PoseVelBiasState<Scalar>& other)
       : linearized(false), state_linearized(other) {
     delta.setZero();
+    backup_delta.setZero();
     state_current = other;
   }
 
@@ -199,6 +202,7 @@ struct PoseStateWithLin {
   PoseStateWithLin(int64_t t_ns, const SE3& T_w_i, bool linearized = false)
       : linearized(linearized), pose_linearized(t_ns, T_w_i) {
     delta.setZero();
+    backup_delta.setZero();
     T_w_i_current = T_w_i;
   }
 

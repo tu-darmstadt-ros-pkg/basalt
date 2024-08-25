@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pangolin/image/image_io.h>
 #include <pangolin/image/typed_image.h>
 #include <pangolin/pangolin.h>
+#include <pangolin/display/default_font.h>
 
 #include <CLI/CLI.hpp>
 
@@ -715,12 +716,12 @@ void draw_image_overlay(pangolin::View& v, size_t cam_id) {
           pangolin::glDrawCirclePerimeter(c[0], c[1], radius);
 
           if (show_ids)
-            pangolin::GlFont::I().Text("%d", int(c[3])).Draw(c[0], c[1]);
+            pangolin::default_font().Text("%d", int(c[3])).Draw(c[0], c[1]);
         }
       }
 
       glColor3f(1.0, 0.0, 0.0);
-      pangolin::GlFont::I()
+      pangolin::default_font()
           .Text("Tracked %d points", points.size())
           .Draw(5, 20);
     }
@@ -749,10 +750,10 @@ void draw_image_overlay(pangolin::View& v, size_t cam_id) {
         const Eigen::Vector2f c = kv.second.translation();
 
         if (show_ids)
-          pangolin::GlFont::I().Text("%d", kv.first).Draw(5 + c[0], 5 + c[1]);
+          pangolin::default_font().Text("%d", kv.first).Draw(5 + c[0], 5 + c[1]);
       }
 
-      pangolin::GlFont::I()
+      pangolin::default_font()
           .Text("%d opt_flow patches", kp_map.size())
           .Draw(5, 20);
     }
