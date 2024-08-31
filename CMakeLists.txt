@@ -143,7 +143,7 @@ else()
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
     # These are disabled due to warnings in pangolin
     #set(BASALT_CXX_FLAGS "${BASALT_CXX_FLAGS} -Wno-error=parentheses")
-    set(BASALT_CXX_FLAGS "${BASALT_CXX_FLAGS} -Wno-parentheses")
+    set(BASALT_CXX_FLAGS "${BASALT_CXX_FLAGS} -Wno-parentheses -Wno-error=array-bounds")
   endif()
 endif()
 
