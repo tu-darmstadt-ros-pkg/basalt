@@ -52,11 +52,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/Imu.h>
 
+#include <opencv2/opencv.hpp>
+
 #include <basalt/utils/filesystem.h>
+#include <unordered_map>
 
 namespace basalt {
 
 class RosbagVioDataset : public VioDataset {
+  // TODO link against cv bridge instead?
+  const std::vector<std::string> supported_8bit_encodings = {
+      "rgb8", "rgba8", "bgr8", "bgra8"};
+  const std::vector<std::string> supported_16bit_encodings = {
+      "rgb16", "rgba16", "bgr16", "bgra16"};
+  const std::unordered_map<std::string, int> encoding_to_cvtcolor = {
+    {"rgb8", cv::COLOR_RGB2GRAY},
+    {"rgba8", cv::COLOR_RGBA2GRAY},
+    {"rgb16", cv::COLOR_RGB2GRAY},
+    {"rgba16", cv::COLOR_RGBA2GRAY},
+    {"bgr8", cv::COLOR_BGR2GRAY},
+    {"bgra8", cv::COLOR_BGRA2GRAY},
+    {"bgr16", cv::COLOR_BGR2GRAY},
+    {"bgra16", cv::COLOR_BGRA2GRAY}
+  };
+
+  const std::unordered_map<std::string, int> encoding_to_opencv_type = {
+      {"rgb8", CV_8UC3},   {"rgba8", CV_8UC4},  {"bgr8", CV_8UC3},
+      {"bgra8", CV_8UC4},  {"rgb16", CV_16UC3}, {"rgba16", CV_16UC4},
+      {"bgr16", CV_16UC3}, {"bgra16", CV_16UC4}};
+  
   std::shared_ptr<rosbag::Bag> bag;
   std::mutex m;
 
@@ -131,6 +155,11 @@ class RosbagVioDataset : public VioDataset {
           id.exposure = -1;
         }
 
+        /*if (img_->encoding != "mono8" && img_->encoding != "mono16") {
+          
+
+        } else*/
+
         if (img_msg->encoding == "mono8") {
           const uint8_t *data_in = img_msg->data.data();
           uint16_t *data_out = id.img->ptr;
@@ -144,9 +173,33 @@ class RosbagVioDataset : public VioDataset {
         } else if (img_msg->encoding == "mono16") {
           std::memcpy(id.img->ptr, img_msg->data.data(), img_msg->data.size());
         } else {
-          std::cerr << "Encoding " << img_msg->encoding << " is not supported."
-                    << std::endl;
-          std::abort();
+          auto it_cvt = encoding_to_cvtcolor.find(img_msg->encoding);
+          if (it_cvt == encoding_to_cvtcolor.end()) {
+            std::cerr << "Encoding " << img_msg->encoding
+                      << " is not supported." << std::endl;
+            std::abort();
+          }
+
+          uint image_type = encoding_to_opencv_type.at(img_msg->encoding);
+          
+          cv::Mat img_in = cv::Mat(img_msg->height, img_msg->width, image_type,
+                             (void *)img_msg->data.data(), img_msg->step);
+          
+          // Convert to 16 bit
+          if (std::find(supported_8bit_encodings.begin(), supported_8bit_encodings.end(), img_msg->encoding) != 
+              supported_8bit_encodings.end()) {
+            auto image_type_converted = image_type + 2;  // +2 shifts from 8U to 16U
+            img_in.convertTo(img_in, image_type_converted, 257.0);
+            image_type = image_type_converted;
+          }
+
+          cv::Mat img_gray(img_msg->height, img_msg->width, CV_16UC1,
+                           id.img->ptr, id.img->pitch);
+
+          cv::cvtColor(img_in, img_gray, it_cvt->second);
+          //std::cerr << "Encoding " << img_msg->encoding << " is not supported."
+          //          << std::endl;
+          //std::abort();
         }
       }
 
