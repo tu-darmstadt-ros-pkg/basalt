@@ -632,7 +632,7 @@ void CamCalib::initCamExtrinsics() {
       TimeCamId tcid_i(timestamp_ns, cam_i);
 
       auto it = calib_init_poses.find(tcid_i);
-      if (it == calib_init_poses.end() || it->second.num_inliers < MIN_CORNERS)
+      if (it == calib_init_poses.end() || it->second->num_inliers < MIN_CORNERS)
         continue;
 
       for (size_t cam_j = cam_i + 1; cam_j < vio_dataset->get_num_cams();
@@ -641,14 +641,14 @@ void CamCalib::initCamExtrinsics() {
 
         auto it2 = calib_init_poses.find(tcid_j);
         if (it2 == calib_init_poses.end() ||
-            it2->second.num_inliers < MIN_CORNERS)
+            it2->second->num_inliers < MIN_CORNERS)
           continue;
 
         std::pair<size_t, size_t> edge_id(cam_i, cam_j);
 
         int curr_weight = cam_graph[edge_id].first;
         int new_weight =
-            std::min(it->second.num_inliers, it2->second.num_inliers);
+            std::min(it->second->num_inliers, it2->second->num_inliers);
 
         if (curr_weight < new_weight) {
           cam_graph[edge_id] = std::make_pair(new_weight, timestamp_ns);
@@ -702,8 +702,8 @@ void CamCalib::initCamExtrinsics() {
 
       calib_opt->calib->T_i_c[new_camera] =
           calib_opt->calib->T_i_c[last_camera] *
-          calib_init_poses.at(tcid_last).T_a_c.inverse() *
-          calib_init_poses.at(tcid_new).T_a_c;
+          calib_init_poses.at(tcid_last)->T_a_c.inverse() *
+          calib_init_poses.at(tcid_new)->T_a_c;
 
       last_camera = new_camera;
       cameras_initialized[last_camera] = true;
@@ -749,8 +749,8 @@ void CamCalib::initOptimization() {
       TimeCamId tcid(timestamp_ns, cam_id);
       const auto cp_it = calib_init_poses.find(tcid);
       if (cp_it != calib_init_poses.end()) {
-        if ((int)cp_it->second.num_inliers > max_inliers) {
-          max_inliers = cp_it->second.num_inliers;
+        if ((int)cp_it->second->num_inliers > max_inliers) {
+          max_inliers = cp_it->second->num_inliers;
           max_inliers_idx = cam_id;
         }
       }
@@ -762,7 +762,7 @@ void CamCalib::initOptimization() {
 
       // Initial pose
       calib_opt->addPoseMeasurement(
-          timestamp_ns, cp_it->second.T_a_c *
+          timestamp_ns, cp_it->second->T_a_c *
                             calib_opt->calib->T_i_c[max_inliers_idx].inverse());
     } else {
       // Set all frames invalid if we do not have initial pose
@@ -1015,17 +1015,17 @@ void CamCalib::drawImageOverlay(pangolin::View &v, size_t cam_id) {
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       if (calib_init_poses.find(tcid) != calib_init_poses.end()) {
-        const CalibInitPoseData &cr = calib_init_poses.at(tcid);
+        const std::shared_ptr<const CalibInitPoseData> &cr = calib_init_poses.at(tcid);
 
-        for (size_t i = 0; i < cr.reprojected_corners.size(); i++) {
-          Eigen::Vector2d c = cr.reprojected_corners[i];
+        for (size_t i = 0; i < cr->reprojected_corners.size(); i++) {
+          Eigen::Vector2d c = cr->reprojected_corners[i];
           pangolin::glDrawCirclePerimeter(c[0], c[1], 3.0);
 
           if (show_ids) pangolin::default_font().Text("%d", i).Draw(c[0], c[1]);
         }
 
         pangolin::default_font()
-            .Text("Initial pose with %d inliers", cr.num_inliers)
+            .Text("Initial pose with %d inliers", cr->num_inliers)
             .Draw(5, 100);
 
       } else {

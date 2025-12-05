@@ -331,8 +331,8 @@ void CamImuCalib::initCamImuTransform() {
     if (calib_init_poses.find(tcid0) == calib_init_poses.end()) continue;
     if (calib_init_poses.find(tcid1) == calib_init_poses.end()) continue;
 
-    Sophus::SE3d T_a_c0 = calib_init_poses.at(tcid0).T_a_c;
-    Sophus::SE3d T_a_c1 = calib_init_poses.at(tcid1).T_a_c;
+    Sophus::SE3d T_a_c0 = calib_init_poses.at(tcid0)->T_a_c;
+    Sophus::SE3d T_a_c1 = calib_init_poses.at(tcid1)->T_a_c;
 
     double dt = (timestamp1_ns - timestamp0_ns) * 1e-9;
 
@@ -449,7 +449,7 @@ void CamImuCalib::initOptimization() {
 
     if (cp_it != calib_init_poses.end()) {
       Sophus::SE3d T_a_i =
-          cp_it->second.T_a_c * calib_opt->getCamT_i_c(0).inverse();
+          cp_it->second->T_a_c * calib_opt->getCamT_i_c(0).inverse();
 
       calib_opt->addPoseMeasurement(timestamp_ns, T_a_i);
 
@@ -876,17 +876,17 @@ void CamImuCalib::drawImageOverlay(pangolin::View &v, size_t cam_id) {
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       if (calib_init_poses.find(tcid) != calib_init_poses.end()) {
-        const CalibInitPoseData &cr = calib_init_poses.at(tcid);
+        const std::shared_ptr<const CalibInitPoseData> &cr = calib_init_poses.at(tcid);
 
-        for (size_t i = 0; i < cr.reprojected_corners.size(); i++) {
-          Eigen::Vector2d c = cr.reprojected_corners[i];
+        for (size_t i = 0; i < cr->reprojected_corners.size(); i++) {
+          Eigen::Vector2d c = cr->reprojected_corners[i];
           pangolin::glDrawCirclePerimeter(c[0], c[1], 3.0);
 
           if (show_ids) pangolin::default_font().Text("%d", i).Draw(c[0], c[1]);
         }
 
         pangolin::default_font()
-            .Text("Initial pose with %d inliers", cr.num_inliers)
+            .Text("Initial pose with %d inliers", cr->num_inliers)
             .Draw(5, 100);
 
       } else {
@@ -974,7 +974,7 @@ void CamImuCalib::recomputeDataLog() {
 
     if (it != calib_init_poses.end() && calib_opt &&
         calib_opt->calibInitialized())
-      pose_meas = it->second.T_a_c * calib_opt->getCamT_i_c(0).inverse();
+      pose_meas = it->second->T_a_c * calib_opt->getCamT_i_c(0).inverse();
 
     Eigen::Vector3d p_sp = pose_sp.translation();
     Eigen::Vector3d p_meas = pose_meas.translation();

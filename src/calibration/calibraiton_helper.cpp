@@ -167,12 +167,13 @@ void CalibHelper::initCamPoses(
                         TimeCamId tcid = corners[j];
                         const CalibCornerData &ccd = calib_corners.at(tcid);
 
-                        CalibInitPoseData cp;
+                        //CalibInitPoseData cp;
+                        auto cp_ptr = std::make_shared<CalibInitPoseData>();
 
                         computeInitialPose(calib, tcid.cam_id,
-                                           aprilgrid_corner_pos_3d, ccd, cp);
+                                           aprilgrid_corner_pos_3d, ccd, *cp_ptr);
 
-                        calib_init_poses.emplace(tcid, cp);
+                        calib_init_poses.emplace(tcid, cp_ptr);
                       }
                     });
 }

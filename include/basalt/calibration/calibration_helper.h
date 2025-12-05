@@ -72,7 +72,7 @@ using CalibCornerMap = tbb::concurrent_unordered_map<TimeCamId, CalibCornerData,
                                                      std::hash<TimeCamId>>;
 
 using CalibInitPoseMap =
-    tbb::concurrent_unordered_map<TimeCamId, CalibInitPoseData,
+    tbb::concurrent_unordered_map<TimeCamId, std::shared_ptr<CalibInitPoseData>,
                                   std::hash<TimeCamId>>;
 
 class CalibHelper {
