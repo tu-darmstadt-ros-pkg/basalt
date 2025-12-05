@@ -133,6 +133,10 @@ void CamCalib::initGui() {
   pangolin::Var<std::function<void(void)>> init_cam_intrinsics(
       "ui.init_cam_intr", std::bind(&CamCalib::initCamIntrinsics, this));
 
+  pangolin::Var<std::function<void(void)>> load_prev_calib(
+      "ui.load_prev_calib",
+      std::bind(&CamCalib::loadCalib, this));
+
   pangolin::Var<std::function<void(void)>> init_cam_poses(
       "ui.init_cam_poses", std::bind(&CamCalib::initCamPoses, this));
 
@@ -947,6 +951,15 @@ void CamCalib::saveCalib() {
     std::cout << "Saved calibration in " << cache_path << "calibration.json"
               << std::endl;
   }
+}
+
+void CamCalib::loadCalib() {
+  if (!calib_opt) calib_opt.reset(new PosesOptimization);
+
+  calib_opt->loadCalib(cache_path);
+  
+  std::cout << "Loaded calibration from " << cache_path << "calibration.json"
+            << std::endl;
 }
 
 void CamCalib::drawImageOverlay(pangolin::View &v, size_t cam_id) {
